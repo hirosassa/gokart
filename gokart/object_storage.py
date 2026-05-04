@@ -23,18 +23,22 @@ class ObjectStorage:
     def get_object_storage_target(path: str, format: Format) -> luigi.target.FileSystemTarget:
         if path.startswith('s3://'):
             try:
-                import luigi.contrib.s3
+                import boto3  # noqa: F401
             except ImportError:
                 raise ImportError('S3 support requires additional dependencies. Install them with: pip install gokart[s3]') from None
+
+            import luigi.contrib.s3
 
             from gokart.s3_config import S3Config
 
             return luigi.contrib.s3.S3Target(path, client=S3Config().get_s3_client(), format=format)
         elif path.startswith('gs://'):
             try:
-                import luigi.contrib.gcs
+                import googleapiclient  # noqa: F401
             except ImportError:
                 raise ImportError('GCS support requires additional dependencies. Install them with: pip install gokart[gcs]') from None
+
+            import luigi.contrib.gcs
 
             from gokart.gcs_config import GCSConfig
 
@@ -88,8 +92,9 @@ class ObjectStorage:
     @staticmethod
     def is_buffered_reader(file: object) -> bool:
         try:
-            import luigi.contrib.s3
-
-            return not isinstance(file, luigi.contrib.s3.ReadableS3File)
+            import boto3  # noqa: F401
         except ImportError:
             return True
+        import luigi.contrib.s3
+
+        return not isinstance(file, luigi.contrib.s3.ReadableS3File)

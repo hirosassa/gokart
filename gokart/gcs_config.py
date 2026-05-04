@@ -22,9 +22,11 @@ class GCSConfig(luigi.Config):
 
     def _get_gcs_client(self) -> luigi.contrib.gcs.GCSClient:
         try:
-            import luigi.contrib.gcs
+            import googleapiclient  # noqa: F401
         except ImportError:
             raise ImportError('GCS support requires additional dependencies. Install them with: pip install gokart[gcs]') from None
+        import luigi.contrib.gcs
+
         return luigi.contrib.gcs.GCSClient(oauth_credentials=self._load_oauth_credentials())
 
     def _load_oauth_credentials(self) -> Credentials | None:
